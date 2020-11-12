@@ -1,5 +1,5 @@
 <script lang="ts">
-    import "./global.css";
+    //import "./global.css";
     import Input from "./Input.svelte";
     import Output from "./Output.svelte";
     import type { Component } from "./types";

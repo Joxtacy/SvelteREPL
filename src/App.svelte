@@ -1,11 +1,7 @@
 <script lang="ts">
-    import "./global.css";
-    import MyWorker from "./worker?worker";
     import Input from "./Input.svelte";
     import Output from "./Output.svelte";
     import type { Component } from "./types";
-
-    const worker = new MyWorker();
 
     let components: Component[] = [
         {
@@ -27,16 +23,6 @@
     ];
 
     let current: number = 0;
-
-    worker.addEventListener("message", async (event: MessageEvent<string>): Promise<void> => {
-        console.log(event.data);
-    });
-
-    function compile(_components: Component[]): void {
-        worker.postMessage(_components);
-    }
-
-    $: compile(components);
 </script>
 
 <style>

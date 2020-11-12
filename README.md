@@ -1,2 +1,0 @@
-# SvelteREPL
-Simple Svelte REPL

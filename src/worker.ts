@@ -9,6 +9,7 @@ importScripts(`${CDN_URL}/svelte/compiler.js`);
 const componentLookup = new Map<string, Component>();
 
 function generateLookup(components: Component[]): void {
+    componentLookup.clear();
     components.forEach((component) => {
         componentLookup.set(`./${component.name}.${component.type}`, component);
     });
@@ -77,7 +78,6 @@ self.addEventListener(
         const output = (await bundle.generate({ format: "esm" })).output[0]
             .code;
 
-        //@ts-ignore
-        self.postMessage(output);
+        self.postMessage(output, "*");
     }
 );

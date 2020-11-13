@@ -5,6 +5,7 @@
     interface TabDispatcher {
         select: number;
         new: void;
+        del: number;
     }
 
     const dispatch = createEventDispatcher<TabDispatcher>();
@@ -13,20 +14,14 @@
     export let current: number = 0;
 </script>
 
-<ul>
-    {#each tabs as { name, type, id }}
-        <li
-            class:active={id === current}
-            on:click={() => dispatch('select', id)}>
-            {name}.{type}
-        </li>
-    {/each}
-    <li><button on:click={() => dispatch('new')}>+</button></li>
-</ul>
-
 <style>
     li {
         cursor: pointer;
+    }
+
+    button {
+        text-decoration: initial;
+        margin-left: 5px;
     }
 
     .active {
@@ -34,3 +29,17 @@
         text-decoration: underline;
     }
 </style>
+
+<ul>
+    {#each tabs as { name, type, id }, index}
+        <li
+            class:active={id === current}
+            on:click={() => dispatch('select', id)}>
+            {name}.{type}
+            {#if index !== 0}
+                <button on:click={() => dispatch('del', id)}>x</button>
+            {/if}
+        </li>
+    {/each}
+    <li><button on:click={() => dispatch('new')}>+</button></li>
+</ul>

@@ -18,10 +18,14 @@
 
             // set textarea value to: text before caret + tab + text after caret
             const spaceTab = `    `;
-            textarea.value =`${textarea.value.substring(0, start)}${spaceTab}${textarea.value.substring(end)}`;
+            textarea.value = `${textarea.value.substring(
+                0,
+                start
+            )}${spaceTab}${textarea.value.substring(end)}`;
 
             // put caret at right position again
-            textarea.selectionStart = textarea.selectionEnd = start + spaceTab.length;
+            textarea.selectionStart = textarea.selectionEnd =
+                start + spaceTab.length;
         }
     }
 
@@ -47,6 +51,11 @@
         current = id;
         textarea.focus();
     }
+
+    function deleteComponent(deleteId: number) {
+        current = 0;
+        components = components.filter(({ id }) => id !== deleteId);
+    }
 </script>
 
 <section>
@@ -54,7 +63,8 @@
         {tabs}
         {current}
         on:select={({ detail }) => (current = detail)}
-        on:new={newComponent} />
+        on:new={newComponent}
+        on:del={({ detail }) => deleteComponent(detail)} />
     <textarea
         on:keydown={keydownHandler}
         bind:value={components[currentComponentId].source}

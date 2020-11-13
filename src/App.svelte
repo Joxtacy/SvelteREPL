@@ -11,14 +11,13 @@
 
     worker.addEventListener("message", (event: MessageEvent<string>) => {
         compiled = event.data;
-    })
+    });
 
     function compile(_components: Component[]): void {
         worker.postMessage(_components);
     }
 
     $: compile($codeStore);
-
 </script>
 
 <style>

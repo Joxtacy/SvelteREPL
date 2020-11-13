@@ -5,7 +5,6 @@ import livereload from "rollup-plugin-livereload";
 import sveltePreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
 
-
 const production = !process.env.ROLLUP_WATCH;
 
 const onwarn = ({ message }) =>

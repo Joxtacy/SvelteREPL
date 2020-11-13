@@ -4,7 +4,9 @@ import commonjs from "@rollup/plugin-commonjs";
 import livereload from "rollup-plugin-livereload";
 import sveltePreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
-import derp from "./src/rollup-plugin-dynamic-html";
+import herp from "./src/rollup-plugin-html-thingy";
+
+const yep = herp();
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -41,14 +43,14 @@ export default [
         preserveEntrySignatures: false,
         input: "src/index.ts",
         output: {
-            sourcemap: true,
+            sourcemap: production ? false : true,
             format: "iife",
             name: "app",
             dir: production ? "dist" : "public",
-            entryFileNames: "[name]-[hash].js",
+            entryFileNames: production ? "[name]-[hash].js" : "index.js",
         },
         plugins: [
-            derp(),
+            production ? yep() : undefined,
             svelte({
                 dev: !production,
                 css: (css) => {
@@ -75,14 +77,14 @@ export default [
         preserveEntrySignatures: false,
         input: "src/worker.ts",
         output: {
-            sourcemap: true,
+            sourcemap: production ? false : true,
             format: "esm",
             name: "app",
             dir: production ? "dist" : "public",
-            entryFileNames: "[name]-[hash].js",
+            entryFileNames: "worker.js",
         },
         plugins: [
-            derp(),
+            production ? yep() : undefined,
             resolve({
                 browser: true,
                 dedupe: ["svelte"],

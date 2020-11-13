@@ -23,6 +23,8 @@
     ];
 
     let current: number = 0;
+
+    const worker = new Worker("./worker.js");
 </script>
 
 <style>

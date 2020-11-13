@@ -4,7 +4,7 @@ import * as rollup from "rollup/dist/es/rollup.browser.js";
 
 const CDN_URL = "https://cdn.jsdelivr.net/npm";
 
-self.importScripts(`${CDN_URL}/svelte/compiler.js`);
+importScripts(`${CDN_URL}/svelte/compiler.js`);
 
 const componentLookup = new Map<string, Component>();
 

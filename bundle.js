@@ -20,6 +20,21 @@ var app = (function () {
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
     }
+    function subscribe(store, ...callbacks) {
+        if (store == null) {
+            return noop;
+        }
+        const unsub = store.subscribe(...callbacks);
+        return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+    }
+    function get_store_value(store) {
+        let value;
+        subscribe(store, _ => value = _)();
+        return value;
+    }
+    function component_subscribe(component, store, callback) {
+        component.$$.on_destroy.push(subscribe(store, callback));
+    }
 
     function append(target, node) {
         target.appendChild(node);
@@ -501,8 +516,8 @@ var app = (function () {
     			}
     		});
 
-    	tabs_1.$on("select", /*select_handler*/ ctx[6]);
-    	tabs_1.$on("new", /*newComponent*/ ctx[5]);
+    	tabs_1.$on("select", /*select_handler*/ ctx[7]);
+    	tabs_1.$on("new", /*newComponent*/ ctx[6]);
 
     	return {
     		c() {
@@ -517,11 +532,15 @@ var app = (function () {
     			append(section, t);
     			append(section, textarea_1);
     			set_input_value(textarea_1, /*components*/ ctx[0][/*currentComponentId*/ ctx[3]].source);
-    			/*textarea_1_binding*/ ctx[8](textarea_1);
+    			/*textarea_1_binding*/ ctx[9](textarea_1);
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(textarea_1, "input", /*textarea_1_input_handler*/ ctx[7]);
+    				dispose = [
+    					listen(textarea_1, "keydown", /*keydownHandler*/ ctx[5]),
+    					listen(textarea_1, "input", /*textarea_1_input_handler*/ ctx[8])
+    				];
+
     				mounted = true;
     			}
     		},
@@ -547,9 +566,9 @@ var app = (function () {
     		d(detaching) {
     			if (detaching) detach(section);
     			destroy_component(tabs_1);
-    			/*textarea_1_binding*/ ctx[8](null);
+    			/*textarea_1_binding*/ ctx[9](null);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
     }
@@ -564,6 +583,22 @@ var app = (function () {
     	let { components = [] } = $$props;
     	let { current = 0 } = $$props;
     	let textarea;
+
+    	function keydownHandler(event) {
+    		if (event.key == "Tab") {
+    			event.preventDefault();
+    			var start = textarea.selectionStart;
+    			var end = textarea.selectionEnd;
+
+    			// set textarea value to: text before caret + tab + text after caret
+    			const spaceTab = `    `;
+
+    			$$invalidate(2, textarea.value = `${textarea.value.substring(0, start)}${spaceTab}${textarea.value.substring(end)}`, textarea);
+
+    			// put caret at right position again
+    			$$invalidate(2, textarea.selectionStart = $$invalidate(2, textarea.selectionEnd = start + spaceTab.length, textarea), textarea);
+    		}
+    	}
 
     	function newComponent() {
     		const id = getMax(components) + 1;
@@ -622,6 +657,7 @@ var app = (function () {
     		textarea,
     		currentComponentId,
     		tabs,
+    		keydownHandler,
     		newComponent,
     		select_handler,
     		textarea_1_input_handler,
@@ -729,6 +765,111 @@ var app = (function () {
     	}
     }
 
+    const subscriber_queue = [];
+    /**
+     * Create a `Writable` store that allows both updating and reading by subscription.
+     * @param {*=}value initial value
+     * @param {StartStopNotifier=}start start and stop notifications for subscriptions
+     */
+    function writable(value, start = noop) {
+        let stop;
+        const subscribers = [];
+        function set(new_value) {
+            if (safe_not_equal(value, new_value)) {
+                value = new_value;
+                if (stop) { // store is ready
+                    const run_queue = !subscriber_queue.length;
+                    for (let i = 0; i < subscribers.length; i += 1) {
+                        const s = subscribers[i];
+                        s[1]();
+                        subscriber_queue.push(s, value);
+                    }
+                    if (run_queue) {
+                        for (let i = 0; i < subscriber_queue.length; i += 2) {
+                            subscriber_queue[i][0](subscriber_queue[i + 1]);
+                        }
+                        subscriber_queue.length = 0;
+                    }
+                }
+            }
+        }
+        function update(fn) {
+            set(fn(value));
+        }
+        function subscribe(run, invalidate = noop) {
+            const subscriber = [run, invalidate];
+            subscribers.push(subscriber);
+            if (subscribers.length === 1) {
+                stop = start(set) || noop;
+            }
+            run(value);
+            return () => {
+                const index = subscribers.indexOf(subscriber);
+                if (index !== -1) {
+                    subscribers.splice(index, 1);
+                }
+                if (subscribers.length === 0) {
+                    stop();
+                    stop = null;
+                }
+            };
+        }
+        return { set, update, subscribe };
+    }
+
+    /**
+     * This function creates a Svelte store that also saves its data
+     * in LocalStorage using the provided key.
+     * Note: This function will probably not work as expected
+     * if there already is an object in LocalStorage with the same key.
+     *
+     * @param key a string for the LocalStorage
+     * @param initial the initial value to for the store
+     *
+     * @return a Svelte Writable store
+     */
+    const createLocalStore = (key, initial) => {
+        const toString = (value) => JSON.stringify(value, null, 2);
+        const toObject = JSON.parse;
+        if (localStorage.getItem(key) === null) {
+            localStorage.setItem(key, toString(initial));
+        }
+        const saved = toObject(localStorage.getItem(key));
+        const store = writable(saved);
+        const { subscribe, set } = store;
+        const localSet = (value) => {
+            localStorage.setItem(key, toString(value));
+            set(value);
+        };
+        const localUpdate = (updater) => {
+            const updated = updater(get_store_value(store));
+            localSet(updated);
+        };
+        return {
+            subscribe,
+            update: localUpdate,
+            set: localSet,
+        };
+    };
+    const codeStore = createLocalStore("code", [
+        {
+            id: 0,
+            name: "App",
+            type: "svelte",
+            source: `<script>
+    import Component from './Component1.svelte';
+<\/script>
+
+<Component />`,
+        },
+        {
+            id: 1,
+            name: "Component1",
+            type: "svelte",
+            source: "<h1>Hello REPL</h1>",
+        },
+    ]);
+
     /* src/App.svelte generated by Svelte v3.29.0 */
 
     function create_fragment$3(ctx) {
@@ -750,18 +891,18 @@ var app = (function () {
 
     	let input_props = {};
 
-    	if (/*components*/ ctx[0] !== void 0) {
-    		input_props.components = /*components*/ ctx[0];
+    	if (/*$codeStore*/ ctx[2] !== void 0) {
+    		input_props.components = /*$codeStore*/ ctx[2];
     	}
 
-    	if (/*current*/ ctx[1] !== void 0) {
-    		input_props.current = /*current*/ ctx[1];
+    	if (/*current*/ ctx[0] !== void 0) {
+    		input_props.current = /*current*/ ctx[0];
     	}
 
     	input = new Input({ props: input_props });
     	binding_callbacks.push(() => bind(input, "components", input_components_binding));
     	binding_callbacks.push(() => bind(input, "current", input_current_binding));
-    	output = new Output({ props: { compiled: /*compiled*/ ctx[2] } });
+    	output = new Output({ props: { compiled: /*compiled*/ ctx[1] } });
 
     	return {
     		c() {
@@ -780,21 +921,21 @@ var app = (function () {
     		p(ctx, [dirty]) {
     			const input_changes = {};
 
-    			if (!updating_components && dirty & /*components*/ 1) {
+    			if (!updating_components && dirty & /*$codeStore*/ 4) {
     				updating_components = true;
-    				input_changes.components = /*components*/ ctx[0];
+    				input_changes.components = /*$codeStore*/ ctx[2];
     				add_flush_callback(() => updating_components = false);
     			}
 
-    			if (!updating_current && dirty & /*current*/ 2) {
+    			if (!updating_current && dirty & /*current*/ 1) {
     				updating_current = true;
-    				input_changes.current = /*current*/ ctx[1];
+    				input_changes.current = /*current*/ ctx[0];
     				add_flush_callback(() => updating_current = false);
     			}
 
     			input.$set(input_changes);
     			const output_changes = {};
-    			if (dirty & /*compiled*/ 4) output_changes.compiled = /*compiled*/ ctx[2];
+    			if (dirty & /*compiled*/ 2) output_changes.compiled = /*compiled*/ ctx[1];
     			output.$set(output_changes);
     		},
     		i(local) {
@@ -817,33 +958,15 @@ var app = (function () {
     }
 
     function instance$3($$self, $$props, $$invalidate) {
+    	let $codeStore;
+    	component_subscribe($$self, codeStore, $$value => $$invalidate(2, $codeStore = $$value));
     	
-
-    	let components = [
-    		{
-    			id: 0,
-    			name: "App",
-    			type: "svelte",
-    			source: `<script>
-    import Component from './Component1.svelte';
-<\/script>
-
-<Component />`
-    		},
-    		{
-    			id: 1,
-    			name: "Component1",
-    			type: "svelte",
-    			source: "<h1>Hello REPL</h1>"
-    		}
-    	];
-
     	let current = 0;
     	let compiled;
     	const worker = new Worker("./worker.js");
 
     	worker.addEventListener("message", event => {
-    		$$invalidate(2, compiled = event.data);
+    		$$invalidate(1, compiled = event.data);
     	});
 
     	function compile(_components) {
@@ -851,22 +974,22 @@ var app = (function () {
     	}
 
     	function input_components_binding(value) {
-    		components = value;
-    		$$invalidate(0, components);
+    		$codeStore = value;
+    		codeStore.set($codeStore);
     	}
 
     	function input_current_binding(value) {
     		current = value;
-    		$$invalidate(1, current);
+    		$$invalidate(0, current);
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*components*/ 1) {
-    			 compile(components);
+    		if ($$self.$$.dirty & /*$codeStore*/ 4) {
+    			 compile($codeStore);
     		}
     	};
 
-    	return [components, current, compiled, input_components_binding, input_current_binding];
+    	return [current, compiled, $codeStore, input_components_binding, input_current_binding];
     }
 
     class App extends SvelteComponent {

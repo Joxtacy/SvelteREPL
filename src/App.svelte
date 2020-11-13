@@ -2,25 +2,7 @@
     import Input from "./Input.svelte";
     import Output from "./Output.svelte";
     import type { Component } from "./types";
-
-    let components: Component[] = [
-        {
-            id: 0,
-            name: "App",
-            type: "svelte",
-            source: `<script>
-    import Component from './Component1.svelte';
-<\/script>
-
-<Component />`,
-        },
-        {
-            id: 1,
-            name: "Component1",
-            type: "svelte",
-            source: "<h1>Hello REPL</h1>",
-        },
-    ];
+    import { codeStore } from "./stores";
 
     let current: number = 0;
     let compiled: string;
@@ -35,13 +17,14 @@
         worker.postMessage(_components);
     }
 
-    $: compile(components);
+    $: compile($codeStore);
+
 </script>
 
 <style>
 </style>
 
 <main>
-    <Input bind:components bind:current />
+    <Input bind:components={$codeStore} bind:current />
     <Output {compiled} />
 </main>

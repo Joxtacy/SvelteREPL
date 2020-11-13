@@ -1,5 +1,5 @@
-import { Writable, writable, get } from "svelte/store";
-import type { Component, JsonValue, UnaryOperator } from "./types";
+import { Writable, writable, get, derived } from "svelte/store";
+import type { Component, JsonValue, Tab, UnaryOperator } from "./types";
 
 /**
  * This function creates a Svelte store that also saves its data
@@ -59,3 +59,8 @@ export const codeStore = createLocalStore<Component[]>("code", [
         source: "<h1>Hello REPL</h1>",
     },
 ]);
+
+export const tabsStore = derived<Writable<Component[]>, Tab[]>(
+    codeStore,
+    ($codeStore) => $codeStore.map(({ id, name, type }) => ({ id, name, type }))
+);

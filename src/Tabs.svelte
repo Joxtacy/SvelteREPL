@@ -15,6 +15,10 @@
 </script>
 
 <style>
+    ul {
+        margin-bottom: 0;
+    }
+
     li {
         cursor: pointer;
     }

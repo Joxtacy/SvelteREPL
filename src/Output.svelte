@@ -41,3 +41,10 @@
 </script>
 
 <section><iframe title="Rendered REPL" bind:this={iframe} {srcdoc} /></section>
+
+<style>
+    section {
+        border: solid 1px black;
+        width: 100%
+    }
+</style>

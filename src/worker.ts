@@ -76,5 +76,8 @@ self.addEventListener(
 
         const output = (await bundle.generate({ format: "esm" })).output[0]
             .code;
+
+        //@ts-ignore
+        self.postMessage(output);
     }
 );

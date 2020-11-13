@@ -1,3 +1,8 @@
-li.svelte-dyxluc{cursor:pointer}button.svelte-dyxluc{text-decoration:initial;margin-left:5px}.active.svelte-dyxluc{font-weight:900;text-decoration:underline}
+main.svelte-7erknf{display:grid;grid-template-areas:"tabs tabs"
+        "input output";grid-template-columns:1fr 1fr;grid-template-rows:50px 1fr;gap:5px}.tabs.svelte-7erknf{grid-area:tabs;justify-self:start;align-self:start;overflow-x:scroll;width:100%;height:100%}.input.svelte-7erknf{grid-area:input}.output.svelte-7erknf{grid-area:output}
+section.svelte-jzi2e1{width:100%}
+section.svelte-15qmmmg{border:solid 1px black;width:100%
+    }
+ul.svelte-ld7opu{margin-bottom:0}li.svelte-ld7opu{cursor:pointer}button.svelte-ld7opu{text-decoration:initial;margin-left:5px}.active.svelte-ld7opu{font-weight:900;text-decoration:underline}
 
 /*# sourceMappingURL=bundle.css.map */

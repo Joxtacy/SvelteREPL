@@ -69,6 +69,7 @@ self.addEventListener("message", async (event) => {
     });
     const output = (await bundle.generate({ format: "esm" })).output[0]
         .code;
-    self.postMessage(output, "*");
+    // @ts-ignore
+    self.postMessage(output);
 });
 //# sourceMappingURL=worker.js.map

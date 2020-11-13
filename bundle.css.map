@@ -5,8 +5,8 @@
     "Tabs.svelte"
   ],
   "sourcesContent": [
-    "<script lang=\"ts\">import { createEventDispatcher } from \"svelte\";\n;\nconst dispatch = createEventDispatcher();\nexport let tabs = [];\nexport let current = 0;\n</script>\n\n<ul>\n    {#each tabs as { name, type, id }}\n        <li\n            class:active={id === current}\n            on:click={() => dispatch('select', id)}>\n            {name}.{type}\n        </li>\n    {/each}\n    <li><button on:click={() => dispatch('new')}>+</button></li>\n</ul>\n\n<style>\n    li {\n        cursor: pointer;\n    }\n\n    .active {\n        font-weight: 900;\n        text-decoration: underline;\n    }\n</style>"
+    "<script lang=\"ts\">import { createEventDispatcher } from \"svelte\";\n;\nconst dispatch = createEventDispatcher();\nexport let tabs = [];\nexport let current = 0;\n</script>\n\n<style>\n    li {\n        cursor: pointer;\n    }\n\n    button {\n        text-decoration: initial;\n        margin-left: 5px;\n    }\n\n    .active {\n        font-weight: 900;\n        text-decoration: underline;\n    }\n</style>\n\n<ul>\n    {#each tabs as { name, type, id }, index}\n        <li\n            class:active={id === current}\n            on:click={() => dispatch('select', id)}>\n            {name}.{type}\n            {#if index !== 0}\n                <button on:click={() => dispatch('del', id)}>x</button>\n            {/if}\n        </li>\n    {/each}\n    <li><button on:click={() => dispatch('new')}>+</button></li>\n</ul>\n"
   ],
   "names": [],
-  "mappings": "AAmBI,EAAE,eAAC,CAAC,AACA,MAAM,CAAE,OAAO,AACnB,CAAC,AAED,OAAO,eAAC,CAAC,AACL,WAAW,CAAE,GAAG,CAChB,eAAe,CAAE,SAAS,AAC9B,CAAC"
+  "mappings": "AAQI,EAAE,cAAC,CAAC,AACA,MAAM,CAAE,OAAO,AACnB,CAAC,AAED,MAAM,cAAC,CAAC,AACJ,eAAe,CAAE,OAAO,CACxB,WAAW,CAAE,GAAG,AACpB,CAAC,AAED,OAAO,cAAC,CAAC,AACL,WAAW,CAAE,GAAG,CAChB,eAAe,CAAE,SAAS,AAC9B,CAAC"
 }

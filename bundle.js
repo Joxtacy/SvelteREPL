@@ -338,25 +338,63 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[5] = list[i].name;
-    	child_ctx[6] = list[i].type;
-    	child_ctx[7] = list[i].id;
+    	child_ctx[6] = list[i].name;
+    	child_ctx[7] = list[i].type;
+    	child_ctx[8] = list[i].id;
+    	child_ctx[10] = i;
     	return child_ctx;
     }
 
-    // (9:4) {#each tabs as { name, type, id }}
-    function create_each_block(ctx) {
-    	let li;
-    	let t0_value = /*name*/ ctx[5] + "";
-    	let t0;
-    	let t1;
-    	let t2_value = /*type*/ ctx[6] + "";
-    	let t2;
+    // (30:12) {#if index !== 0}
+    function create_if_block(ctx) {
+    	let button;
     	let mounted;
     	let dispose;
 
     	function click_handler(...args) {
-    		return /*click_handler*/ ctx[3](/*id*/ ctx[7], ...args);
+    		return /*click_handler*/ ctx[3](/*id*/ ctx[8], ...args);
+    	}
+
+    	return {
+    		c() {
+    			button = element("button");
+    			button.textContent = "x";
+    			attr(button, "class", "svelte-dyxluc");
+    		},
+    		m(target, anchor) {
+    			insert(target, button, anchor);
+
+    			if (!mounted) {
+    				dispose = listen(button, "click", click_handler);
+    				mounted = true;
+    			}
+    		},
+    		p(new_ctx, dirty) {
+    			ctx = new_ctx;
+    		},
+    		d(detaching) {
+    			if (detaching) detach(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+    }
+
+    // (25:4) {#each tabs as { name, type, id }
+    function create_each_block(ctx) {
+    	let li;
+    	let t0_value = /*name*/ ctx[6] + "";
+    	let t0;
+    	let t1;
+    	let t2_value = /*type*/ ctx[7] + "";
+    	let t2;
+    	let t3;
+    	let mounted;
+    	let dispose;
+    	let if_block = /*index*/ ctx[10] !== 0 && create_if_block(ctx);
+
+    	function click_handler_1(...args) {
+    		return /*click_handler_1*/ ctx[4](/*id*/ ctx[8], ...args);
     	}
 
     	return {
@@ -365,31 +403,37 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = text(".");
     			t2 = text(t2_value);
-    			attr(li, "class", "svelte-1sfnb3x");
-    			toggle_class(li, "active", /*id*/ ctx[7] === /*current*/ ctx[1]);
+    			t3 = space();
+    			if (if_block) if_block.c();
+    			attr(li, "class", "svelte-dyxluc");
+    			toggle_class(li, "active", /*id*/ ctx[8] === /*current*/ ctx[1]);
     		},
     		m(target, anchor) {
     			insert(target, li, anchor);
     			append(li, t0);
     			append(li, t1);
     			append(li, t2);
+    			append(li, t3);
+    			if (if_block) if_block.m(li, null);
 
     			if (!mounted) {
-    				dispose = listen(li, "click", click_handler);
+    				dispose = listen(li, "click", click_handler_1);
     				mounted = true;
     			}
     		},
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*tabs*/ 1 && t0_value !== (t0_value = /*name*/ ctx[5] + "")) set_data(t0, t0_value);
-    			if (dirty & /*tabs*/ 1 && t2_value !== (t2_value = /*type*/ ctx[6] + "")) set_data(t2, t2_value);
+    			if (dirty & /*tabs*/ 1 && t0_value !== (t0_value = /*name*/ ctx[6] + "")) set_data(t0, t0_value);
+    			if (dirty & /*tabs*/ 1 && t2_value !== (t2_value = /*type*/ ctx[7] + "")) set_data(t2, t2_value);
+    			if (/*index*/ ctx[10] !== 0) if_block.p(ctx, dirty);
 
     			if (dirty & /*tabs, current*/ 3) {
-    				toggle_class(li, "active", /*id*/ ctx[7] === /*current*/ ctx[1]);
+    				toggle_class(li, "active", /*id*/ ctx[8] === /*current*/ ctx[1]);
     			}
     		},
     		d(detaching) {
     			if (detaching) detach(li);
+    			if (if_block) if_block.d();
     			mounted = false;
     			dispose();
     		}
@@ -422,7 +466,8 @@ var app = (function () {
     			li = element("li");
     			button = element("button");
     			button.textContent = "+";
-    			attr(li, "class", "svelte-1sfnb3x");
+    			attr(button, "class", "svelte-dyxluc");
+    			attr(li, "class", "svelte-dyxluc");
     		},
     		m(target, anchor) {
     			insert(target, ul, anchor);
@@ -436,7 +481,7 @@ var app = (function () {
     			append(li, button);
 
     			if (!mounted) {
-    				dispose = listen(button, "click", /*click_handler_1*/ ctx[4]);
+    				dispose = listen(button, "click", /*click_handler_2*/ ctx[5]);
     				mounted = true;
     			}
     		},
@@ -480,15 +525,16 @@ var app = (function () {
     	const dispatch = createEventDispatcher();
     	let { tabs = [] } = $$props;
     	let { current = 0 } = $$props;
-    	const click_handler = id => dispatch("select", id);
-    	const click_handler_1 = () => dispatch("new");
+    	const click_handler = id => dispatch("del", id);
+    	const click_handler_1 = id => dispatch("select", id);
+    	const click_handler_2 = () => dispatch("new");
 
     	$$self.$$set = $$props => {
     		if ("tabs" in $$props) $$invalidate(0, tabs = $$props.tabs);
     		if ("current" in $$props) $$invalidate(1, current = $$props.current);
     	};
 
-    	return [tabs, current, dispatch, click_handler, click_handler_1];
+    	return [tabs, current, dispatch, click_handler, click_handler_1, click_handler_2];
     }
 
     class Tabs extends SvelteComponent {
@@ -516,8 +562,9 @@ var app = (function () {
     			}
     		});
 
-    	tabs_1.$on("select", /*select_handler*/ ctx[7]);
+    	tabs_1.$on("select", /*select_handler*/ ctx[8]);
     	tabs_1.$on("new", /*newComponent*/ ctx[6]);
+    	tabs_1.$on("del", /*del_handler*/ ctx[9]);
 
     	return {
     		c() {
@@ -532,13 +579,13 @@ var app = (function () {
     			append(section, t);
     			append(section, textarea_1);
     			set_input_value(textarea_1, /*components*/ ctx[0][/*currentComponentId*/ ctx[3]].source);
-    			/*textarea_1_binding*/ ctx[9](textarea_1);
+    			/*textarea_1_binding*/ ctx[11](textarea_1);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
     					listen(textarea_1, "keydown", /*keydownHandler*/ ctx[5]),
-    					listen(textarea_1, "input", /*textarea_1_input_handler*/ ctx[8])
+    					listen(textarea_1, "input", /*textarea_1_input_handler*/ ctx[10])
     				];
 
     				mounted = true;
@@ -566,7 +613,7 @@ var app = (function () {
     		d(detaching) {
     			if (detaching) detach(section);
     			destroy_component(tabs_1);
-    			/*textarea_1_binding*/ ctx[9](null);
+    			/*textarea_1_binding*/ ctx[11](null);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -618,7 +665,13 @@ var app = (function () {
     		textarea.focus();
     	}
 
+    	function deleteComponent(deleteId) {
+    		$$invalidate(1, current = 0);
+    		$$invalidate(0, components = components.filter(({ id }) => id !== deleteId));
+    	}
+
     	const select_handler = ({ detail }) => $$invalidate(1, current = detail);
+    	const del_handler = ({ detail }) => deleteComponent(detail);
 
     	function textarea_1_input_handler() {
     		components[currentComponentId].source = this.value;
@@ -659,7 +712,9 @@ var app = (function () {
     		tabs,
     		keydownHandler,
     		newComponent,
+    		deleteComponent,
     		select_handler,
+    		del_handler,
     		textarea_1_input_handler,
     		textarea_1_binding
     	];

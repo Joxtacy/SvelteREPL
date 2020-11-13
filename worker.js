@@ -14,6 +14,7 @@ const CDN_URL = "https://cdn.jsdelivr.net/npm";
 importScripts(`${CDN_URL}/svelte/compiler.js`);
 const componentLookup = new Map();
 function generateLookup(components) {
+    componentLookup.clear();
     components.forEach((component) => {
         componentLookup.set(`./${component.name}.${component.type}`, component);
     });
@@ -68,7 +69,6 @@ self.addEventListener("message", async (event) => {
     });
     const output = (await bundle.generate({ format: "esm" })).output[0]
         .code;
-    //@ts-ignore
-    self.postMessage(output);
+    self.postMessage(output, "*");
 });
 //# sourceMappingURL=worker.js.map

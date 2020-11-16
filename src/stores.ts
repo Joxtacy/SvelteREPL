@@ -1,4 +1,5 @@
 import { Writable, writable, get, derived } from "svelte/store";
+import { componentApp, component1 } from "./defaultComponents";
 import type { Component, JsonValue, Tab, UnaryOperator } from "./types";
 
 /**
@@ -12,7 +13,10 @@ import type { Component, JsonValue, Tab, UnaryOperator } from "./types";
  *
  * @return a Svelte Writable store
  */
-const createLocalStore = <T>(key: string, initial: T): Writable<T> => {
+const createLocalStore = <T extends JsonValue>(
+    key: string,
+    initial: T
+): Writable<T> => {
     const toString = (value: T) => JSON.stringify(value, null, 2);
     const toObject = JSON.parse;
 
@@ -42,22 +46,8 @@ const createLocalStore = <T>(key: string, initial: T): Writable<T> => {
 };
 
 export const codeStore = createLocalStore<Component[]>("code", [
-    {
-        id: 0,
-        name: "App",
-        type: "svelte",
-        source: `<script>
-    import Component from './Component1.svelte';
-<\/script>
-
-<Component />`,
-    },
-    {
-        id: 1,
-        name: "Component1",
-        type: "svelte",
-        source: "<h1>Hello REPL</h1>",
-    },
+    componentApp,
+    component1,
 ]);
 
 export const tabsStore = derived<Writable<Component[]>, Tab[]>(

@@ -13,6 +13,7 @@ export type JsonValue =
     | number
     | boolean
     | null
+    | Component
     | JsonValue[]
     | { [key: string]: JsonValue };
 

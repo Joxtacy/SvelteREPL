@@ -35,7 +35,7 @@
             id,
             name: `Component${id}`,
             type: "svelte",
-            source: "<h1>Hello REPL</h1>",
+            source: "",
         });
 
         current = id;
@@ -48,8 +48,8 @@
     main {
         display: grid;
         grid-template-areas:
-        "tabs tabs"
-        "input output";
+            "tabs tabs"
+            "input output";
         grid-template-columns: 1fr 1fr;
         grid-template-rows: 50px 1fr;
         gap: 5px;

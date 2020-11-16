@@ -1,5 +1,5 @@
-main.svelte-7erknf{display:grid;grid-template-areas:"tabs tabs"
-        "input output";grid-template-columns:1fr 1fr;grid-template-rows:50px 1fr;gap:5px}.tabs.svelte-7erknf{grid-area:tabs;justify-self:start;align-self:start;overflow-x:scroll;width:100%;height:100%}.input.svelte-7erknf{grid-area:input}.output.svelte-7erknf{grid-area:output}
+main.svelte-1ifwqbv{display:grid;grid-template-areas:"tabs tabs"
+            "input output";grid-template-columns:1fr 1fr;grid-template-rows:50px 1fr;gap:5px}.tabs.svelte-1ifwqbv{grid-area:tabs;justify-self:start;align-self:start;overflow-x:scroll;width:100%;height:100%}.input.svelte-1ifwqbv{grid-area:input}.output.svelte-1ifwqbv{grid-area:output}
 section.svelte-jzi2e1{width:100%}
 section.svelte-15qmmmg{border:solid 1px black;width:100%
     }

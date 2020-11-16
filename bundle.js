@@ -441,6 +441,27 @@ var app = (function () {
         });
     }
 
+    const componentApp = {
+        id: 0,
+        name: "App",
+        type: "svelte",
+        source: `<script>
+    import Component from './Component1.svelte';
+<\/script>
+
+<Component name={"SvelteREPL"}/>`,
+    };
+    const component1 = {
+        id: 1,
+        name: "Component1",
+        type: "svelte",
+        source: `<script>
+    export let name = "World";
+</script>
+
+<h1>Hello {name}</h1>`,
+    };
+
     /**
      * This function creates a Svelte store that also saves its data
      * in LocalStorage using the provided key.
@@ -476,22 +497,8 @@ var app = (function () {
         };
     };
     const codeStore = createLocalStore("code", [
-        {
-            id: 0,
-            name: "App",
-            type: "svelte",
-            source: `<script>
-    import Component from './Component1.svelte';
-<\/script>
-
-<Component />`,
-        },
-        {
-            id: 1,
-            name: "Component1",
-            type: "svelte",
-            source: "<h1>Hello REPL</h1>",
-        },
+        componentApp,
+        component1,
     ]);
     const tabsStore = derived(codeStore, ($codeStore) => $codeStore.map(({ id, name, type }) => ({ id, name, type })));
 
@@ -976,10 +983,10 @@ var app = (function () {
     			t1 = space();
     			div2 = element("div");
     			create_component(output.$$.fragment);
-    			attr(div0, "class", "tabs svelte-7erknf");
-    			attr(div1, "class", "input svelte-7erknf");
-    			attr(div2, "class", "output svelte-7erknf");
-    			attr(main, "class", "svelte-7erknf");
+    			attr(div0, "class", "tabs svelte-1ifwqbv");
+    			attr(div1, "class", "input svelte-1ifwqbv");
+    			attr(div2, "class", "output svelte-1ifwqbv");
+    			attr(main, "class", "svelte-1ifwqbv");
     		},
     		m(target, anchor) {
     			insert(target, main, anchor);
@@ -1076,7 +1083,7 @@ var app = (function () {
     				id,
     				name: `Component${id}`,
     				type: "svelte",
-    				source: "<h1>Hello REPL</h1>"
+    				source: ""
     			}),
     			$codeStore
     		);
